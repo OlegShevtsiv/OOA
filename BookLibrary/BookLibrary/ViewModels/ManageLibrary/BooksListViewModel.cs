@@ -9,7 +9,6 @@ namespace BookLibrary.ViewModels.ManageLibrary
     public class BooksListViewModel
     {
         public IEnumerable<BookDTO> Books { get; set; }
-        public BooksFilterViewModel BooksFilterVM { get; set; }
         public PageViewModel BooksPageVM { get; set; }
         public BooksSortViewModel BooksSortVM { get; set; }
     }

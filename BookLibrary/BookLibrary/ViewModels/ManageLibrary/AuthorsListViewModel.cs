@@ -12,7 +12,6 @@ namespace BookLibrary.ViewModels.ManageLibrary
     public class AuthorsListViewModel
     {
         public IEnumerable<AuthorDTO> Authors { get; set; }
-        public AuthorsFilterViewModel AuthorsFilterVM { get; set; }
         public PageViewModel AuthorsPageVM { get; set; }
         public AuthorsSortViewModel AuthorsSortVM { get; set; }
     }

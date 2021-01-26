@@ -36,58 +36,12 @@ namespace BookLibrary.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index(string searchReq = "", int page = 1, SortEnum sortOrder = SortEnum.TITLE_ASC)
+        public IActionResult Index(int page = 1, SortEnum sortOrder = SortEnum.TITLE_ASC)
         {
             int pageSize = 2;
 
-            // filtration
-            List<BookDTO> Books = new List<BookDTO>();
-            if (string.IsNullOrEmpty(searchReq))
-            {
-                Books = _bookService.GetAll().ToList();
-            }
-            else
-            {
-                List<string> keyWords = searchReq.Trim().Split(' ').ToList();
-                List<BookDTO> allBooks = _bookService.GetAll().ToList();
-                for (int i = 0; i < keyWords.Count; i++)
-                {
-                    keyWords[i] = keyWords[i].ToLower().Trim();
-                    foreach (BookDTO book in allBooks)
-                    {
-                        if (book.Title.ToLower().Contains(keyWords[i]))
-                        {
-                            if (!Books.Exists(b => b.Id == book.Id))
-                            {
-                                Books.Add(book);
-                            }
-                        }
-                        if (book.Year.ToString() == keyWords[i])
-                        {
-                            if (!Books.Exists(b => b.Id == book.Id))
-                            {
-                                Books.Add(book);
-                            }
-                        }
-                        if (_authorService.Get(book.AuthorId).Name.ToLower() == keyWords[i])
-                        {
-                            if (!Books.Exists(b => b.Id == book.Id))
-                            {
-                                Books.Add(book);
-                            }
-                        }
-                        if (_authorService.Get(book.AuthorId).Surname.ToLower() == keyWords[i])
-                        {
-                            if (!Books.Exists(b => b.Id == book.Id))
-                            {
-                                Books.Add(book);
-                            }
-                        }
-                    }
-                }
-            }
-
-            //sorting
+            List<BookDTO> Books = _bookService.GetAll().ToList();
+            
             switch (sortOrder)
             {
                 case SortEnum.TITLE_DESC:
@@ -128,7 +82,6 @@ namespace BookLibrary.Controllers
 
             BooksListViewModel viewModel = new BooksListViewModel
             {
-                BooksFilterVM = new BooksFilterViewModel(searchReq),
                 BooksPageVM = new PageViewModel(count, page, pageSize),
                 BooksSortVM = new BooksSortViewModel(sortOrder),
                 Books = items
@@ -268,9 +221,7 @@ namespace BookLibrary.Controllers
             _bookService.Remove(id);
             return RedirectToAction("Index");
         }
-
-        [HttpGet]
-
+        
         [HttpGet]
         public IActionResult AddAuthor()
         {
@@ -378,44 +329,12 @@ namespace BookLibrary.Controllers
             return RedirectToAction("AuthorsList");
         }
 
-        public IActionResult AuthorsList(string searchReq = "", int page = 1, SortEnum sortOrder = SortEnum.NAME_ASC)
+        public IActionResult AuthorsList(int page = 1, SortEnum sortOrder = SortEnum.NAME_ASC)
         {
             int pageSize = 2;
 
-            // filtration
-            List<AuthorDTO> Authors = new List<AuthorDTO>();
-            if (string.IsNullOrEmpty(searchReq))
-            {
-                Authors = _authorService.GetAll().ToList();
-            }
-            else
-            {
-                List<AuthorDTO> AllAuthors = _authorService.GetAll().ToList();
-                List<string> keyWords = searchReq.Trim().Split(' ').ToList();
-                for (int i = 0; i < keyWords.Count; i++)
-                {
-                    keyWords[i] = keyWords[i].ToLower().Trim();
-                    foreach (AuthorDTO author in AllAuthors)
-                    {
-                        if (author.Name.ToLower().Contains(keyWords[i]))
-                        {
-                            if (!Authors.Exists(a => a.Id == author.Id))
-                            {
-                                Authors.Add(author);
-                            }
-                        }
-                        if (author.Surname.ToLower().Contains(keyWords[i]))
-                        {
-                            if (!Authors.Exists(a => a.Id == author.Id))
-                            {
-                                Authors.Add(author);
-                            }
-                        }
-                    }
-                }
-            }
-
-            //sorting
+            List<AuthorDTO> Authors = _authorService.GetAll().ToList();
+            
             switch(sortOrder)
             {
                 case SortEnum.NAME_DESC:
@@ -438,14 +357,12 @@ namespace BookLibrary.Controllers
 
             AuthorsListViewModel viewModel = new AuthorsListViewModel
             {
-                AuthorsFilterVM = new AuthorsFilterViewModel(searchReq),
                 AuthorsPageVM = new PageViewModel(count, page, pageSize),
                 AuthorsSortVM = new AuthorsSortViewModel(sortOrder),
                 Authors = items
             };
             return View(viewModel);
         }
-
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

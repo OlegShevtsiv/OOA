@@ -90,7 +90,7 @@ namespace BookLibrary.Tests
             HomeController controller = new HomeController(BookServiceMoq.Object, AuthorServiceMoq.Object, RateServiceMoq.Object);
 
             // Act
-            RedirectToActionResult result = (RedirectToActionResult)controller.Search("");
+            RedirectToActionResult result = (RedirectToActionResult)controller.Index();
             //Assert
             var viewResult = Assert.IsType<RedirectToActionResult>(result);
         }

@@ -38,14 +38,12 @@ namespace BookLibrary
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<LibraryContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddEntityFrameworkSqlite().AddDbContext<LibraryContext>();
 
             services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
                 options.Password.RequireNonAlphanumeric = false;
-            })
-                .AddEntityFrameworkStores<LibraryContext>().AddDefaultUI().AddDefaultTokenProviders();
+            }).AddEntityFrameworkStores<LibraryContext>().AddDefaultUI().AddDefaultTokenProviders();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
