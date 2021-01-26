@@ -1,0 +1,23 @@
+﻿@model BookLibrary.ViewModels.Home.RateViewModel
+
+<form asp-action="RateBook" asp-controller="Home" method="post" class="d-flex">
+    <div class="form-group">
+        <input type="hidden" asp-for="@Model.UserId" />
+    </div>
+
+    <div class="form-group">
+        <input type="hidden" asp-for="@Model.RatedEssenceId" />
+    </div>
+
+    <div class="form-group pt-3">
+        <select type="number" asp-for="@Model.Value" class="form-control form-control-lg rate-select">
+            @for (int i = 1; i <= 5; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    </div>
+    <div class="form-group mb-2 d-flex align-items-center ml-3">
+        <input type="submit" value="Rate" class="btn btn-sm btn-success" />
+    </div>
+</form>

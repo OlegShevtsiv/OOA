@@ -1,0 +1,28 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model BookLibrary.ViewModels.ManageUsers.ChangeRoleViewModel
+@{
+    ViewData["Title"] = "Changing user roles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mt-5">Changing roles for user @Model.UserEmail</h2>
+
+<form asp-action="EditUserRoles" method="post">
+    <input type="hidden" name="userId" value="@Model.UserId" />
+    <div class="input-group mb-3">
+        @foreach (IdentityRole role in Model.AllRoles)
+        {
+            <div class="d-flex mb-3">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">
+                        <input type="radio" name="roles" value="@role.Name"
+                               @(Model.UserRoles.Contains(role.Name) ? "checked=\"checked\"" : "")>
+                        <span class="checkmark"></span>
+                    </div>
+                </div>
+                <label class="form-control">@role.Name</label>
+            </div>
+        }
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+</form>

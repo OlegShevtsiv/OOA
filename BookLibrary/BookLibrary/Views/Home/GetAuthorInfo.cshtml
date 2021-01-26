@@ -1,0 +1,56 @@
+﻿@using Services.Interfaces;
+@using Services.Filters;
+@using BookLibrary.ViewModels.ManageComments;
+
+@model Services.DTO.AuthorDTO
+@{
+    ViewData["Title"] = "Get author info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@inject IBookService bookService
+
+<div class="container pt-3 pb-4">
+    <div class="row py-5">
+        <div class="col-12 col-md-5 col-lg-4 d-flex flex-column pt-3">
+            <img class="card-img-top w-100" alt="@Model.Name @Model.Surname" style="width:240px; height:300px;" src="data:image/jpeg;base64,@(Convert.ToBase64String(@Model.Image))" />
+        </div>
+        <div class="col-12 col-md-7 col-lg-8 d-flex flex-column pt-3">
+            <div class="h4">Author full name</div>
+            <div class="h5 text-secondary">@Model.Name @Model.Surname</div>
+            <div class="h4">Description</div>
+            <p class="text-secondary">
+                @Model.Description
+            </p>
+
+
+            <div class="more_books d-flex flex-wrap">
+                <div class="col-12 text-center">
+                    <h4>All books</h4>
+                </div>
+                @foreach (var book in bookService.Get(new BookFilterByAuthor { AuthorId = Model.Id }))
+                {
+                    <div class="col-6 col-md-3">
+                        <div class="card text-center">
+                            @if (book.Image != null)
+                            {
+                                <img class="card-img w-100" src="data:image/jpeg;base64,@(Convert.ToBase64String(book.Image))" />
+                            }
+                            <div class="card-body">
+                                <h5 class="card-title">@book.Title</h5>
+                                <h6 class="card-title">Release: @book.Year</h6>
+                                <h6 class="card-title">Rate: @book.Rate</h6>
+                                <a class="btn btn-sm btn-primary" asp-action="GetBookInfo" asp-route-id="@book.Id">More</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-12">
+            @{await Html.RenderPartialAsync("~/Views/ManageComments/_AddCommentPartial.cshtml", new CommentViewModel { EssenceId = Model.Id, IsBook = false });}
+            @{await Html.RenderPartialAsync("~/Views/ManageComments/_AllCommentsPartial.cshtml", new CommentViewModel { EssenceId = Model.Id, IsBook = false });}
+        </div>
+    </div>
+</div>
+

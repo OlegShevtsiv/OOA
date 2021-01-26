@@ -1,0 +1,97 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using Services.Interfaces;
+@using BookLibrary.ViewModels.ManageComments;
+@using BookLibrary.ViewModels.Home;
+
+
+@model Services.DTO.BookDTO
+@{
+    ViewData["Title"] = "Get book info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@inject IAuthorService authorService
+@inject UserManager<IdentityUser> userManager
+@inject SignInManager<IdentityUser> signInManager
+
+
+<div class="container pt-3 pb-4">
+    <div class="row py-5">
+        <div class="col-md-4 d-flex flex-column pt-3">
+            <img class="w-100" style="width:350px; height:400px;" alt="@Model.Title" src="data:image/jpeg;base64,@(Convert.ToBase64String(@Model.Image))" />
+        </div>
+        <div class="col-12 col-md-5 d-flex flex-column pt-3">
+            <div class="d-flex">
+                <h2 class="pr-3 my-0">@Model.Title</h2>
+                <div>
+                    <a asp-action="DownloadBook" asp-route-id="@Model.Id" class="btn btn-primary">Download <i class="fas fa-download"></i></a>
+                </div>
+            </div>
+            <div class="h4">Description:</div>
+            <p class="text-secondary">@Model.Description</p>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="book_desc d-flex">
+                <div class="h3 text-bold pr-3  my-0">Author</div>
+                <div class="h4 pt-1 my-0">
+                    <a asp-action="GetAuthorInfo" asp-route-id="@authorService.Get(Model.AuthorId).Id">@authorService.Get(Model.AuthorId).Name @authorService.Get(Model.AuthorId).Surname</a>
+                </div>
+            </div>
+            <div class="d-flex">
+                <div class="h4 pr-3">Genre: @Model.Genre</div>
+            </div>
+            <div class="d-flex">
+                @if (Model.Rate <= 1)
+                {
+                    <div class="h4 pr-3">Rating: <b style="color:firebrick">@Model.Rate</b> / 5</div>
+                }
+                else if (Model.Rate <= 2)
+                {
+                    <div class="h4 pr-3">Rating: <b style="color:darkorange">@Model.Rate</b> / 5</div>
+                }
+                else if (Model.Rate <= 3)
+                {
+                    <div class="h4 pr-3">Rating: <b style="color:gold">@Model.Rate</b> / 5</div>
+                }
+                else if (Model.Rate <= 4)
+                {
+                    <div class="h4 pr-3">Rating: <b style="color:yellowgreen">@Model.Rate</b> / 5</div>
+                }
+                else
+                {
+                    <div class="h4 pr-3">Rating: <b style="color:limegreen">@Model.Rate</b> / 5</div>
+                }
+
+
+            </div>
+            <div class="d-flex">
+                <div class="h4 pr-3">Number of votes: @Model.RatesAmount</div>
+            </div>
+
+            @if (signInManager.IsSignedIn(User))
+            {
+                await Html.RenderPartialAsync("~/Views/Home/_RatePartial.cshtml", new RateViewModel { RatedEssenceId = Model.Id, UserId = (await userManager.GetUserAsync(User)).Id });
+            }
+            else
+            {
+                <form asp-action="RateBook" asp-controller="Home" method="post" class="d-flex">
+                    <div class="form-group pt-3">
+                        <select type="number" class="form-control form-control-lg rate-select" disabled>
+                            <option>1</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-2 d-flex align-items-center ml-3">
+                        <button type="submit" class="btn btn-sm btn-success">Rate</button>
+                    </div>
+                </form>
+            }
+        </div>
+        <div class="col-12">
+            @{await Html.RenderPartialAsync("~/Views/ManageComments/_AddCommentPartial.cshtml", (new CommentViewModel { EssenceId = Model.Id, IsBook = true }));}
+            @{await Html.RenderPartialAsync("~/Views/ManageComments/_AllCommentsPartial.cshtml", (new CommentViewModel { EssenceId = Model.Id, IsBook = true }));}
+        </div>
+    </div>
+</div>
+
+
+

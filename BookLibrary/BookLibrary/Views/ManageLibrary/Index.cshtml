@@ -1,0 +1,117 @@
+﻿@using Services.Interfaces;
+@model BookLibrary.ViewModels.ManageLibrary.BooksListViewModel
+@addTagHelper "*, BookLibrary"
+
+@{
+    ViewData["Title"] = "Books list";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@inject IAuthorService authorService
+
+<h2 class="mt-5">Books List</h2>
+<a class="btn btn-warning" asp-action="AddBook">Add book</a>
+<a class="btn btn-outline-success" asp-action="AuthorsList">Authors list</a>
+<form method="get">
+    <div class="d-flex">
+        <div class="col-lg-6 mt-5">
+            <div class="col-lg-11 p-0">
+                @Html.TextBox("searchReq", Model.BooksFilterVM.SearchReq, htmlAttributes: new { @class = "form-control border-primary w-100 h1 my-0 form-control-lg", @placeholder = "Search book" })
+            </div>
+            <div class="col-lg-1 p-0">
+                <button type="submit" class="btn btn-primary my-0 form-control-lg"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<table class="table mt-5">
+    <thead class="thead-light">
+        <tr>
+            <th scope="col">#</th>
+            <th>
+                <sort-header action="Index"
+                             up="@Model.BooksSortVM.Up"
+                             current="@Model.BooksSortVM.Current"
+                             property="@Model.BooksSortVM.TitleSort"
+                             page-url-searchReq="@(Model.BooksFilterVM.SearchReq)">
+                    Title
+                </sort-header>
+
+            </th>
+            <th>
+                <sort-header action="Index"
+                             up="@Model.BooksSortVM.Up"
+                             current="@Model.BooksSortVM.Current"
+                             property="@Model.BooksSortVM.YearSort"
+                             page-url-searchReq="@(Model.BooksFilterVM.SearchReq)">
+                    Year
+                </sort-header>
+
+            </th>
+            <th>
+                <sort-header action="Index"
+                             up="@Model.BooksSortVM.Up"
+                             current="@Model.BooksSortVM.Current"
+                             property="@Model.BooksSortVM.AuthorNameSort"
+                             page-url-searchReq="@(Model.BooksFilterVM.SearchReq)">
+                    Author name
+                </sort-header>
+
+            </th>
+            <th>
+                <sort-header action="Index"
+                             up="@Model.BooksSortVM.Up"
+                             current="@Model.BooksSortVM.Current"
+                             property="@Model.BooksSortVM.AuthorSurnameSort"
+                             page-url-searchReq="@(Model.BooksFilterVM.SearchReq)">
+                    Author surname
+                </sort-header>
+
+            </th>
+            <th>
+                <sort-header action="Index"
+                             up="@Model.BooksSortVM.Up"
+                             current="@Model.BooksSortVM.Current"
+                             property="@Model.BooksSortVM.RateSort"
+                             page-url-searchReq="@(Model.BooksFilterVM.SearchReq)">
+                    Rate
+                </sort-header>
+
+            </th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{int i = 0;}
+        @foreach (var book in Model.Books)
+        {
+            i++;
+            <tr>
+                <th scope="row">@i</th>
+                <td>@book.Title</td>
+                <td>@book.Year</td>
+                <td>@authorService.Get(book.AuthorId).Name</td>
+                <td>@authorService.Get(book.AuthorId).Surname</td>
+                <td>@book.Rate</td>
+
+                <td class="d-flex justify-content-end">
+                    <form asp-action="DeleteBook" asp-route-id="@book.Id" method="post">
+                        <a class="btn btn-sm btn-primary" asp-action="EditBook" asp-route-id="@book.Id">Edit</a>
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+
+</table>
+<page-link page-model="Model.BooksPageVM"
+           page-action="Index"
+           page-url-searchReq="@(Model.BooksFilterVM.SearchReq)"
+           page-url-sortOrder="@(Model.BooksSortVM.Current)">
+</page-link>
+
+
+

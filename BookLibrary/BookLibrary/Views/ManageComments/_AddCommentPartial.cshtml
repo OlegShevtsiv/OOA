@@ -1,0 +1,52 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using Services.Interfaces;
+@using Services.Filters;
+
+@inject SignInManager<IdentityUser> signInManager
+@inject UserManager<IdentityUser> userManager
+@inject IBlockedUserService blockedUserService
+
+
+@model BookLibrary.ViewModels.ManageComments.CommentViewModel
+<h3 class="mt-5">Add your comment</h3>
+@{bool isBlocked = false;}
+@if (signInManager.IsSignedIn(User))
+{
+    isBlocked = blockedUserService.Get(new BlockedUserFilterByUserId { UserId = (await userManager.GetUserAsync(User)).Id }).Any();
+    if (!isBlocked)
+    {
+        <form asp-action="AddComment" asp-controller="ManageComments" method="post">
+            <div class="form-group">
+                <input type="hidden" asp-for="OwnerId" value="@((await userManager.GetUserAsync(User)).Id)" />
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="EssenceId" value="@Model.EssenceId" />
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="IsBook" value="@Model.IsBook" />
+            </div>
+            <div class="form-group">
+                <textarea class="form-control" asp-for="Text" required rows="5"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Comment" class="btn btn-success" />
+            </div>
+        </form>
+    }
+    else
+    {
+        <h4 style="color:brown">You are blocked to add comment!</h4>
+    }
+}
+
+else
+{
+    <form asp-action="AddComment" asp-controller="ManageComments" method="post">
+        <div class="form-group">
+            <textarea class="form-control" disabled rows="5"></textarea>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Comment" class="btn btn-success" />
+        </div>
+    </form>
+}

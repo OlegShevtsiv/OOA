@@ -1,0 +1,75 @@
+﻿@model BookLibrary.ViewModels.ManageLibrary.AuthorsListViewModel
+@addTagHelper "*, BookLibrary"
+@{
+    ViewData["Title"] = "Authors list";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mt-5">Authors list</h2>
+<a class="btn btn-success" asp-action="AddAuthor">Add author</a>
+<a class="btn btn-outline-warning" asp-action="Index">Books list</a>
+<form method="get">
+    <div class="d-flex">
+        <div class="col-lg-6 mt-5">
+            <div class="col-lg-11 p-0">
+                @Html.TextBox("searchReq", Model.AuthorsFilterVM.SearchReq, htmlAttributes: new { @class = "form-control border-primary w-100 h1 my-0 form-control-lg", @placeholder = "Search author" })
+            </div>
+            <div class="col-lg-1 p-0">
+                <button type="submit" class="btn btn-primary my-0 form-control-lg"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<table class="table mt-5">
+    <thead class="thead-light">
+        <tr>
+            <th scope="col">#</th>
+            <th>
+                <sort-header action="AuthorsList"
+                             up="@Model.AuthorsSortVM.Up"
+                             current="@Model.AuthorsSortVM.Current"
+                             property="@Model.AuthorsSortVM.SurnameSort"
+                             page-url-searchReq="@(Model.AuthorsFilterVM.SearchReq)">
+                    Surname
+                </sort-header>
+
+            </th>
+            <th>
+                <sort-header action="AuthorsList"
+                             up="@Model.AuthorsSortVM.Up"
+                             current="@Model.AuthorsSortVM.Current"
+                             property="@Model.AuthorsSortVM.NameSort"
+                             page-url-searchReq="@(Model.AuthorsFilterVM.SearchReq)">
+                    Name
+                </sort-header>
+            </th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{int i = 0;}
+        @foreach (var author in Model.Authors)
+        {
+            i++;
+            <tr>
+                <th scope="row">@i</th>
+                <td>@author.Surname</td>
+                <td>@author.Name</td>
+                <td class="d-flex justify-content-end">
+                    <form asp-action="DeleteAuthor" asp-route-id="@author.Id" method="post">
+                        <a class="btn btn-sm btn-primary" asp-action="EditAuthor" asp-route-id="@author.Id">Edit</a>
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+
+</table>
+<page-link page-model="Model.AuthorsPageVM" 
+           page-action="AuthorsList"
+           page-url-searchReq="@(Model.AuthorsFilterVM.SearchReq)"
+           page-url-sortOrder="@(Model.AuthorsSortVM.Current)">
+</page-link>

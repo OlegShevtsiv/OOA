@@ -1,0 +1,84 @@
+﻿@using Services.Interfaces;
+@model IEnumerable<Services.DTO.BookDTO>
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@inject IAuthorService authorService
+<div class="container">
+    <div class="d-flex justify-content-center">
+        <div class="col-8 mt-5">
+            <form asp-action="Search" asp-controller="Home">
+                <div class="col-lg-11 p-0">
+                    <input type="text" class="form-control border-primary w-100 h1 my-0 form-control-lg" id="bookSearch" placeholder="Search book" name="req">
+                </div>
+                <div class="col-lg-1 p-0">
+                    <button type="submit" class="btn btn-primary my-0 form-control-lg"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+        @*<div class="col-12 text-center mt-5">
+                <a href="#" class="btn btn-primary text-uppercase">Top books Authors Genres Wishlist</a>
+            </div>*@
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center">
+                <h2 class="mt-3 mb-4">No books finded</h2>
+                <hr style="border-width: 2px; border-color: grey;" />
+            </div>
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <h1 class="mt-3 mb-4">All Releases</h1>
+                <hr style="border-width: 2px; border-color: grey;" />
+            </div>
+        }
+
+        @foreach (var book in Model)
+        {
+            <div class="col-12 col-md-6 col-lg-3">
+                @if (book.Image != null)
+                {
+                    <img class="card w-100" src="data:image/jpeg;base64,@(Convert.ToBase64String(book.Image))" />
+                }
+                <div class="card-body">
+                    <p class="card-title h4 d-block">"@book.Title"</p>
+
+                    <p class="card-title h5 d-block">Author: <a asp-action="GetAuthorInfo" asp-route-id="@authorService.Get(book.AuthorId).Id">@authorService.Get(book.AuthorId).Name @authorService.Get(book.AuthorId).Surname</a></p>
+                    <p class="card-title h5 d-block">Genre: @book.Genre</p>
+
+                    <p class="card-title h5 d-block">Release year: @book.Year</p>
+                    <hr />
+
+                    @if (book.Rate <= 1)
+                    {
+                        <p class="card-title h5 d-block">Rating: <b style="color: firebrick">@book.Rate</b> / 5</p>
+                    }
+                    else if (book.Rate <= 2)
+                    {
+                        <p class="card-title h5 d-block">Rating: <b style="color:darkorange">@book.Rate</b> / 5</p>
+                    }
+                    else if (book.Rate <= 3)
+                    {
+                        <p class="card-title h5 d-block">Rating: <b style="color:gold">@book.Rate</b> / 5</p>
+                    }
+                    else if (book.Rate <= 4)
+                    {
+                        <p class="card-title h5 d-block">Rating: <b style="color:yellowgreen">@book.Rate</b> / 5</p>
+                    }
+                    else
+                    {
+                        <p class="card-title h5 d-block">Rating: <b style="color:limegreen">@book.Rate</b> / 5</p>
+                    }
+
+                    <a class="btn btn-primary" asp-action="GetBookInfo" asp-route-id="@book.Id">More</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

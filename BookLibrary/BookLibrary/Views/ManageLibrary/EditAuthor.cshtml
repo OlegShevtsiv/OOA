@@ -1,0 +1,34 @@
+﻿@model BookLibrary.ViewModels.ManageLibrary.AuthorViewModel
+@{
+    ViewData["Title"] = "Edit author";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h2 class="mt-5">Author editing</h2>
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="EditAuthor" asp-controller="ManageLibrary" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label class="control-label">Name</label>
+                <input type="text" asp-for="Name" class="form-control form-control-lg" required />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Surname</label>
+                <input type="text" asp-for="Surname" class="form-control form-control-lg" required />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Image</label>
+                <input type="file" asp-for="Image" class="form-control-file form-control-lg border" required />
+            </div>
+            <div class="form-group">
+                <label class="control-label">Description</label>
+                <textarea type="text" asp-for="Description" class="form-control form-control-lg" rows="8"></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-success" />
+            </div>
+        </form>
+
+    </div>
+</div>
