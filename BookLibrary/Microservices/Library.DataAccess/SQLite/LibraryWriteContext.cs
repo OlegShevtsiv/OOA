@@ -13,7 +13,11 @@ namespace Library.DataAccess.SQLite
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(dbPath);
+            optionsBuilder.UseSqlite(dbPath,
+                sqlOptions =>
+                {
+                    sqlOptions.CommandTimeout(5);
+                });
         }
     }
 }

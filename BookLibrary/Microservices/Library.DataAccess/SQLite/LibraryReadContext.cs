@@ -1,4 +1,5 @@
-﻿using Library.DataAccess.EF;
+﻿using System;
+using Library.DataAccess.EF;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.DataAccess.SQLite
@@ -13,7 +14,11 @@ namespace Library.DataAccess.SQLite
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite(dbPath);
+            optionsBuilder.UseSqlite(dbPath,
+                sqlOptions =>
+                {
+                    sqlOptions.CommandTimeout(5);
+                });
         }
     }
 }
