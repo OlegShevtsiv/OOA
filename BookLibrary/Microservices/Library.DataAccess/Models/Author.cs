@@ -1,4 +1,6 @@
-﻿namespace Library.DataAccess.Models
+﻿using System;
+
+namespace Library.DataAccess.Models
 {
     public class Author
     {
@@ -8,7 +10,10 @@
         public string Description { get; set; }
         public byte[] Image { get; set; }
 
-        public Author() { }
+        public Author()
+        {
+            Id = Guid.NewGuid().ToString();
+        }
         public Author(string _id, string _name, string _surname, string _description, byte[] _image)
         {
             Id = _id;

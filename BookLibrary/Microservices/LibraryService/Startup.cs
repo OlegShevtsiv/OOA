@@ -45,6 +45,8 @@ namespace LibraryService
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LibraryService v1"));
             }
+            
+            app.UseMiddleware<ErrorHandlerMiddleware>();
 
             app.UseRouting();
 

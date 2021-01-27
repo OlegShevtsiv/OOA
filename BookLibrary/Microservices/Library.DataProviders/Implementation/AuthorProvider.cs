@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Library.DataAccess.DTO;
+using Library.DataAccess.Exceptions;
 using Library.DataAccess.Interfaces;
 using Library.DataAccess.Models;
 using Library.DataProviders.Filters;
@@ -24,7 +25,7 @@ namespace Library.DataProviders.Implementation
 
             if (entity == null)
             {
-                return new AuthorDTO();
+                throw new NotFoundException();
             }
 
             return MapToDto(entity);
@@ -33,9 +34,9 @@ namespace Library.DataProviders.Implementation
         public override IEnumerable<AuthorDTO> Get(IFilter filter)
         {
             Func<Author, bool> predicate = GetFilter(filter);
-            List<Author> entities = Repository
-              .Get(p => predicate(p))
-              .ToList();
+            List<Author> entities = Repository.Get().ToList()
+                .Where(p => predicate(p))
+                .ToList();
 
             if (!entities.Any())
             {
@@ -58,57 +59,7 @@ namespace Library.DataProviders.Implementation
 
             return entities.Select(e => MapToDto(e));
         }
-
-        // public override void Add(AuthorDTO dto)
-        // {
-        //     Author checkEntity = Repository
-        //         .Get(e => e.Id == dto.Id)
-        //         .SingleOrDefault();
-        //
-        //     if (checkEntity != null)
-        //     {
-        //         throw new DuplicateNameException();
-        //     }
-        //
-        //     Author entity = MapToEntity(dto);
-        //     Repository.Add(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-        //
-        // public override void Remove(string id)
-        // {
-        //     Author entity = Repository
-        //      .Get(e => e.Id == id)
-        //      .SingleOrDefault();
-        //
-        //     if (entity == null)
-        //     {
-        //         throw new ObjectNotFoundException();
-        //     }
-        //
-        //     Repository.Remove(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-        // public override void Update(AuthorDTO dto)
-        // {
-        //     Author entity = Repository
-        //      .Get(e => e.Id == dto.Id)
-        //      .SingleOrDefault();
-        //
-        //     if (entity == null)
-        //     {
-        //         throw new ObjectNotFoundException();
-        //     }
-        //
-        //     entity.Name = dto.Name;
-        //     entity.Surname = dto.Surname;
-        //     entity.Description = dto.Description;
-        //     entity.Image = dto.Image;
-        //
-        //     Repository.Update(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-
+        
         protected override AuthorDTO MapToDto(Author entity)
         {
             if (entity == null)

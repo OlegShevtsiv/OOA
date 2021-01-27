@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Library.DataAccess.DTO;
+using Library.DataAccess.Exceptions;
 using Library.DataAccess.Interfaces;
 using Library.DataAccess.Models;
 using Library.DataProviders.Filters;
@@ -24,7 +25,7 @@ namespace Library.DataProviders.Implementation
 
             if (entity == null)
             {
-                return new RateDTO();
+                throw new NotFoundException();
             }
 
             return MapToDto(entity);
@@ -33,9 +34,9 @@ namespace Library.DataProviders.Implementation
         public override IEnumerable<RateDTO> Get(IFilter filter)
         {
             Func<Rate, bool> predicate = GetFilter(filter);
-            List<Rate> entities = Repository
-              .Get(p => predicate(p))
-              .ToList();
+            List<Rate> entities = Repository.Get().ToList()
+                .Where(p => predicate(p))
+                .ToList();
 
             if (!entities.Any())
             {

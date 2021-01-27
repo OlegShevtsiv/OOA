@@ -10,7 +10,11 @@ namespace Library.DataAccess.Models
         public string UserId { get; set; }
         public string BookId { get; set; }
         public decimal Value { get; set; }
-        public Rate() { }
+
+        public Rate()
+        {
+            Id = Guid.NewGuid().ToString();
+        }
         public Rate(string _id, string _userId, string _bookId, decimal _value)
         {
             Id = _id;

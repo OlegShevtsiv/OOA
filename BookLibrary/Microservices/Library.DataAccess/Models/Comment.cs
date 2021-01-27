@@ -13,7 +13,12 @@ namespace Library.DataAccess.Models
         [DataType(DataType.Date)]
         public DateTime Time { get; set; }
         public string Text { get; set; }
-        public Comment() { }
+
+        public Comment()
+        {
+            Id = Guid.NewGuid().ToString();
+        }
+        
         public Comment(string _id, string _ownerId, string _commentedEssenceId, DateTime _time, string _text)
         {
             Id = _id;

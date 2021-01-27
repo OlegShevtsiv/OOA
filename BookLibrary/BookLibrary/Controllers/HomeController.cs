@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
+using BookLibrary.Client;
 using Microsoft.AspNetCore.Mvc;
 using BookLibrary.Models;
 using Services.Interfaces;
@@ -8,6 +10,7 @@ using Services.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using BookLibrary.ViewModels.Home;
+using Newtonsoft.Json;
 
 namespace BookLibrary.Controllers
 {
@@ -16,18 +19,21 @@ namespace BookLibrary.Controllers
         private readonly IBookService _bookService;
         private readonly IAuthorService _authorService;
         private readonly IRateService _rateService;
+        private readonly ILibraryHttpDataClient _client;
 
-        public HomeController(IBookService bookService, IAuthorService authorService, IRateService rateService)
+        public HomeController(IBookService bookService, IAuthorService authorService, IRateService rateService, ILibraryHttpDataClient client)
         {
             _bookService = bookService;
             _authorService = authorService;
             _rateService = rateService;
+            _client = client;
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_bookService.GetAll().ToList().OrderByDescending(b => b.Rate));
+            var books = (await _client.GetData<IEnumerable<BookDTO>>("books/all")).ToList().OrderByDescending(b => b.Rate).ToList();
+            return View(books);
         }
       
         [HttpPost]
@@ -87,13 +93,14 @@ namespace BookLibrary.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAuthorInfo(string id)
+        public  async Task<IActionResult> GetAuthorInfo(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
                 return RedirectToAction("Error");
             }
-            AuthorDTO currentAuthor = _authorService.Get(id);
+
+            var currentAuthor = (await _client.GetData<AuthorDTO>($"authors?id={id}"));
             if (currentAuthor == null)
             {
                 return RedirectToAction("Error");
@@ -102,13 +109,13 @@ namespace BookLibrary.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetBookInfo(string id)
+        public  async Task<IActionResult> GetBookInfo(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
                 return RedirectToAction("Error");
             }
-            BookDTO currentBook = _bookService.Get(id);
+            var currentBook = (await _client.GetData<BookDTO>($"books?id={id}"));
             if (currentBook == null)
             {
                 return RedirectToAction("Error");
@@ -137,58 +144,17 @@ namespace BookLibrary.Controllers
 
         [Authorize]
         [HttpPost]
-        public IActionResult RateBook(RateViewModel rateVM)
+        public  async Task<IActionResult> RateBook(RateViewModel rateVM)
         {
             if (string.IsNullOrEmpty(rateVM.UserId) || string.IsNullOrEmpty(rateVM.RatedEssenceId) || rateVM.Value < 1 || rateVM.Value > 5)
             {
                 return RedirectToAction("Error");
             }
-            BookDTO bookTORate = _bookService.Get(rateVM.RatedEssenceId);
-            if (bookTORate == null)
-            {
-                return RedirectToAction("Error");
-            }
-            RateDTO yourRate = new RateDTO {
-                                               BookId = rateVM.RatedEssenceId,
-                                               UserId = rateVM.UserId,
-                                               Value = rateVM.Value
-                                           };
-
-            List<RateDTO> allRates = _rateService.GetAll().ToList();
-            if (allRates != null)
-            {
-                bool isFinded = false;
-                foreach (var r in allRates)
-                {
-                    if (r.BookId == rateVM.RatedEssenceId && r.UserId == rateVM.UserId)
-                    {
-                        isFinded = true;
-                        yourRate.Id = r.Id;
-                        bookTORate.Rate += (yourRate.Value - r.Value) / bookTORate.RatesAmount;
-                        _rateService.Update(yourRate);
-                        _bookService.Update(bookTORate);
-                        break;
-                    }
-                }
-                if (!isFinded)
-                {
-                    uint amount = bookTORate.RatesAmount;
-                    bookTORate.RatesAmount++;
-                    bookTORate.Rate = (bookTORate.Rate * amount + yourRate.Value) / bookTORate.RatesAmount;
-                    _bookService.Update(bookTORate);
-                    _rateService.Add(yourRate);
-                }
-            }
-            else
-            {
-                uint amount = bookTORate.RatesAmount;
-                bookTORate.RatesAmount++;
-                bookTORate.Rate = (bookTORate.Rate * amount + yourRate.Value) / bookTORate.RatesAmount;
-                _bookService.Update(bookTORate);
-                _rateService.Add(yourRate);
-            }
             
-            return RedirectToAction("GetBookInfo", "Home", new { id = bookTORate.Id });
+            string postData = JsonConvert.SerializeObject(rateVM);
+            await _client.PostData("rates/rateBook", postData);
+            
+            return RedirectToAction("GetBookInfo", "Home", new { id = rateVM.RatedEssenceId });
         }
 
 

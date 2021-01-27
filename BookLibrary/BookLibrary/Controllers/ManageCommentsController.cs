@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using BookLibrary.Client;
 using BookLibrary.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,13 @@ namespace BookLibrary.Controllers
     {
         
         private readonly ICommentService _commentService;
+        private readonly ILibraryHttpDataClient _client;
 
-        public ManageCommentsController(ICommentService commentService)
+
+        public ManageCommentsController(ICommentService commentService, ILibraryHttpDataClient client)
         {
             _commentService = commentService;
+            _client = client;
         }
 
         [Authorize]

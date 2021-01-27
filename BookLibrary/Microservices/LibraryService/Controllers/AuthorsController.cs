@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Net;
 using Library.DataAccess.DTO;
 using Library.DataProviders.Filters;
 using Library.DataProviders.Interfaces;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryService.Controllers
 {
     [ApiController]
-    [Route("authors/[action]")]
+    [Route("authors/")]
     public class AuthorsController : ControllerBase
     {
         private readonly IAuthorDataWriter _dataWriter;
@@ -26,19 +27,23 @@ namespace LibraryService.Controllers
             _commentProvider = commentProvider;
         }
 
-        [HttpGet]
+        [HttpGet("")]
         public IActionResult Get([Required]string id)
         {
             AuthorDTO currentAuthor = _provider.Get(id);
-            if (currentAuthor == null)
-            {
-                return BadRequest();
-
-            }
             return new ObjectResult(currentAuthor);
         }
         
-        [HttpPost]
+        [HttpGet("all")]
+        public IActionResult GetAll()
+        {
+            var currentBooks = _provider.GetAll();
+
+            return new ObjectResult(currentBooks);
+        }
+        
+        [HttpPost("")]
+        [ProducesResponseType(typeof(AuthorPostModel), (int)HttpStatusCode.OK)]
         public IActionResult Post([Required][FromBody]AuthorPostModel model)
         {
             if (ModelState.IsValid)
@@ -47,28 +52,18 @@ namespace LibraryService.Controllers
                 {
                     Name = model.Name.Trim(),
                     Description = model.Description,
-                    Surname = model.Surname.Trim()
+                    Surname = model.Surname.Trim(),
+                    Image = model.Image
                 };
-                if (model.Image != null)
-                {
-                    byte[] imageData = null;
-                    using (var binaryReader = new BinaryReader(model.Image.OpenReadStream()))
-                    {
-                        imageData = binaryReader.ReadBytes((int)model.Image.Length);
-                    }
-                    newAuthor.Image = imageData;
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                
                 _dataWriter.Add(newAuthor);
             }
 
             return Ok();
         }
         
-        [HttpPut]
+        [HttpPut("")]
+        [ProducesResponseType(typeof(AuthorPostModel), (int)HttpStatusCode.OK)]
         public IActionResult Put([Required]string id, [Required][FromBody]AuthorPostModel model)
         {
             if (ModelState.IsValid)
@@ -78,30 +73,18 @@ namespace LibraryService.Controllers
                     Id = id,
                     Name = model.Name.Trim(),
                     Description = model.Description,
-                    Surname = model.Surname.Trim()
+                    Surname = model.Surname.Trim(),
+                    Image = model.Image
                 };
-                if (model.Image != null)
-                {
-                    byte[] imageData = null;
-                    using (var binaryReader = new BinaryReader(model.Image.OpenReadStream()))
-                    {
-                        imageData = binaryReader.ReadBytes((int)model.Image.Length);
-                    }
-                    newAuthor.Image = imageData;
-                }
-                else
-                {
-                    return BadRequest();
-                }
-
+                
                 _dataWriter.Update(newAuthor);
             }
 
             return Ok();
         }
         
-        [HttpDelete]
-        public IActionResult Delete(string id)
+        [HttpDelete("")]
+        public IActionResult Delete([Required]string id)
         {
             foreach (var c in _commentProvider.Get(new CommentFilter { CommentedEssenceId = id }))
             {

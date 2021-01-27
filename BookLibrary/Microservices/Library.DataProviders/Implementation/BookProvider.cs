@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Library.DataAccess.DTO;
+using Library.DataAccess.Exceptions;
 using Library.DataAccess.Interfaces;
 using Library.DataAccess.Models;
 using Library.DataProviders.Filters;
@@ -24,7 +25,7 @@ namespace Library.DataProviders.Implementation
 
             if (entity == null)
             {
-                return new BookDTO();
+                throw new NotFoundException();
             }
 
             return MapToDto(entity);
@@ -33,9 +34,9 @@ namespace Library.DataProviders.Implementation
         public override IEnumerable<BookDTO> Get(IFilter filter)
         {
             Func<Book, bool> predicate = GetFilter(filter);
-            List<Book> entities = Repository
-              .Get(p => predicate(p))
-              .ToList();
+            List<Book> entities = Repository.Get().ToList()
+                .Where(p => predicate(p))
+                .ToList();
 
             if (!entities.Any())
             {
@@ -60,62 +61,7 @@ namespace Library.DataProviders.Implementation
 
             return entities.Select(e => MapToDto(e));
         }
-
-        // public override void Add(BookDTO dto)
-        // {
-        //     Book checkEntity = Repository
-        //         .Get(e => e.Id == dto.Id)
-        //         .SingleOrDefault();
-        //
-        //     if (checkEntity != null)
-        //     {
-        //         throw new DuplicateNameException();
-        //     }
-        //
-        //     Book entity = MapToEntity(dto);
-        //     Repository.Add(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-        //
-        // public override void Remove(string id)
-        // {
-        //     Book entity = Repository
-        //      .Get(e => e.Id == id)
-        //      .SingleOrDefault();
-        //
-        //     if (entity == null)
-        //     {
-        //         throw new ObjectNotFoundException();
-        //     }
-        //
-        //     Repository.Remove(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-        // public override void Update(BookDTO dto)
-        // {
-        //     Book entity = Repository
-        //      .Get(e => e.Id == dto.Id)
-        //      .SingleOrDefault();
-        //
-        //     if (entity == null)
-        //     {
-        //         throw new ObjectNotFoundException();
-        //     }
-        //
-        //     entity.Title = dto.Title;
-        //     entity.Description = dto.Description;
-        //     entity.AuthorId = dto.AuthorId;
-        //     entity.Rate = dto.Rate;
-        //     entity.Image = dto.Image;
-        //     entity.FileBook = dto.FileBook;
-        //     entity.Year = dto.Year;
-        //     entity.Genre = dto.Genre;
-        //     entity.RatesAmount = dto.RatesAmount;
-        //
-        //     Repository.Update(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-
+        
         protected override BookDTO MapToDto(Book entity)
         {
             if (entity == null)

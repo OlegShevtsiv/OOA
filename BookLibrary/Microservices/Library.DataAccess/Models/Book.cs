@@ -1,4 +1,6 @@
-﻿namespace Library.DataAccess.Models
+﻿using System;
+
+namespace Library.DataAccess.Models
 {
     public class Book
     {
@@ -16,7 +18,10 @@
         public string Genre { get; set; }
         public uint RatesAmount { get; set; }
 
-        public Book() { }
+        public Book() 
+        {
+            Id = Guid.NewGuid().ToString();
+        }
 
         public Book(string _id, string _title, Author _author, string _authorId, int _year, byte[] image, byte[] _fileBook, decimal _rate, string _description, string _genres, uint _ratesAmount)
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Library.DataAccess.DTO;
+using Library.DataAccess.Exceptions;
 using Library.DataAccess.Interfaces;
 using Library.DataAccess.Models;
 using Library.DataProviders.Filters;
@@ -24,7 +25,7 @@ namespace Library.DataProviders.Implementation
 
             if (entity == null)
             {
-                return new CommentDTO();
+                throw new NotFoundException();
             }
 
             return MapToDto(entity);
@@ -33,8 +34,8 @@ namespace Library.DataProviders.Implementation
         public override IEnumerable<CommentDTO> Get(IFilter filter)
         {
             Func<Comment, bool> predicate = GetFilter(filter);
-            List<Comment> entities = Repository
-              .Get(p => predicate(p))
+            List<Comment> entities = Repository.Get().ToList()
+              .Where(p => predicate(p))
               .ToList();
 
             if (!entities.Any())
@@ -58,57 +59,7 @@ namespace Library.DataProviders.Implementation
 
             return entities.Select(e => MapToDto(e));
         }
-
-        // public override void Add(CommentDTO dto)
-        // {
-        //     Comment checkEntity = Repository
-        //         .Get(e => e.Id == dto.Id)
-        //         .SingleOrDefault();
-        //
-        //     if (checkEntity != null)
-        //     {
-        //         throw new DuplicateNameException();
-        //     }
-        //
-        //     Comment entity = MapToEntity(dto);
-        //     Repository.Add(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-        //
-        // public override void Remove(string id)
-        // {
-        //     Comment entity = Repository
-        //      .Get(e => e.Id == id)
-        //      .SingleOrDefault();
-        //
-        //     if (entity == null)
-        //     {
-        //         throw new ObjectNotFoundException();
-        //     }
-        //
-        //     Repository.Remove(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-        // public override void Update(CommentDTO dto)
-        // {
-        //     Comment entity = Repository
-        //      .Get(e => e.Id == dto.Id)
-        //      .SingleOrDefault();
-        //
-        //     if (entity == null)
-        //     {
-        //         throw new ObjectNotFoundException();
-        //     }
-        //
-        //     entity.OwnerId = dto.OwnerId;
-        //     entity.CommentedEssenceId = dto.CommentedEssenceId;
-        //     entity.Text = dto.Text;
-        //     entity.Time = dto.Time;
-        //
-        //     Repository.Update(entity);
-        //     _unitOfWork.SaveChanges();
-        // }
-
+        
         protected override CommentDTO MapToDto(Comment entity)
         {
             if (entity == null)

@@ -10,10 +10,8 @@ namespace LibraryService.TransferModels
         [Required]
         public string AuthorId { get; set; }
         public int Year { get; set; }
-        [Required]
-        public IFormFile Image { get; set; }
-        [Required]
-        public IFormFile FileBook { get; set; }
+        public byte[] Image { get; set; }
+        public byte[] FileBook { get; set; }
         [Required]
         public string Genre { get; set; }
         public string Description { get; set; }

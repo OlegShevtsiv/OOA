@@ -3,8 +3,8 @@ using System.Data;
 using System.Linq;
 using Library.DataAccess.DTO;
 using Library.DataAccess.EF;
+using Library.DataAccess.Exceptions;
 using Library.DataAccess.Models;
-using Library.DataWriters.Exceptions;
 using Library.DataWriters.Interfaces;
 
 namespace Library.DataWriters.Implementations
@@ -26,6 +26,7 @@ namespace Library.DataWriters.Implementations
             }
         
             Rate entity = MapToEntity(dto);
+            entity.Id = Guid.NewGuid().ToString();
             Context.Add(entity);
             Context.SaveChanges();
         }
@@ -36,7 +37,7 @@ namespace Library.DataWriters.Implementations
             
             if (entity == null)
             {
-                throw new ObjectNotFoundException();
+                throw new NotFoundException();
             }
         
             Context.Remove(entity);
@@ -48,7 +49,7 @@ namespace Library.DataWriters.Implementations
 
             if (entity == null)
             {
-                throw new ObjectNotFoundException();
+                throw new NotFoundException();
             }
         
             entity.UserId = dto.UserId;

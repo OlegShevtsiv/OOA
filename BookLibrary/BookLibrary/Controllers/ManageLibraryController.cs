@@ -11,6 +11,7 @@ using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using BookLibrary.Models;
 using System.Diagnostics;
+using BookLibrary.Client;
 using Microsoft.AspNetCore.Http;
 using Services.Filters;
 using BookLibrary.ViewModels.Sorting.States;
@@ -27,11 +28,14 @@ namespace BookLibrary.Controllers
         private readonly IAuthorService _authorService;
         private readonly IRateService _rateService;
         private readonly ICommentService _commentService;
-        public ManageLibraryController(IBookService bookService, IAuthorService authorService, IRateService rateService, ICommentService commentService)
+        private readonly ILibraryHttpDataClient _client;
+
+        public ManageLibraryController(IBookService bookService, IAuthorService authorService, IRateService rateService, ICommentService commentService, ILibraryHttpDataClient client)
         {
             _bookService = bookService;
             _authorService = authorService;
             _commentService = commentService;
+            _client = client;
             _rateService = rateService;
         }
 

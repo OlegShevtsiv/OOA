@@ -1,6 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
 using Library.DataAccess.DTO;
+using Library.DataProviders.Filters;
+using Library.DataProviders.Interfaces;
 using Library.DataWriters.Interfaces;
 using LibraryService.TransferModels;
 using Microsoft.AspNetCore.Mvc;
@@ -8,17 +11,37 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryService.Controllers
 {
     [ApiController]
-    [Route("comments/[action]")]
+    [Route("comments/")]
     public class CommentsController : ControllerBase
     {
         private readonly ICommentDataWriter _dataWriter;
+        private readonly ICommentProvider _provider;
+
         
-        public CommentsController(ICommentDataWriter dataWriter)
+        public CommentsController(ICommentDataWriter dataWriter, ICommentProvider provider)
         {
             _dataWriter = dataWriter;
+            _provider = provider;
+        }
+        
+        [HttpGet("byEssence")]
+        public IActionResult GetByEssence([Required]string essenceId)
+        {
+            var currentBooks = _provider.Get(new CommentFilter{CommentedEssenceId = essenceId});
+
+            return new ObjectResult(currentBooks);
+        }
+        
+        [HttpGet("byUser")]
+        public IActionResult GetByUser([Required]string userId)
+        {
+            var currentBooks = _provider.Get(new CommentFilterByOwnerId{OwnerId = userId});
+
+            return new ObjectResult(currentBooks);
         }
 
-        [HttpPost]
+        [HttpPost("")]
+        [ProducesResponseType(typeof(CommentPostModel), (int)HttpStatusCode.OK)]
         public IActionResult Post([Required][FromBody]CommentPostModel newComment)
         {
             if (newComment == null)
@@ -38,7 +61,8 @@ namespace LibraryService.Controllers
             return Ok();
         }
 
-        [HttpPut]
+        [HttpPut("")]
+        [ProducesResponseType(typeof(CommentPostModel), (int)HttpStatusCode.OK)]
         public IActionResult Put([Required]string id, [Required][FromBody]CommentPostModel commentToEdit)
         {
            
@@ -64,7 +88,7 @@ namespace LibraryService.Controllers
             return Ok();
         }
 
-        [HttpDelete]
+        [HttpDelete("")]
         public IActionResult Delete([Required]string id)
         {
             _dataWriter.Remove(id);

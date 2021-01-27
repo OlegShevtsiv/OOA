@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Net;
 using Library.DataAccess.DTO;
 using Library.DataProviders.Filters;
 using Library.DataProviders.Interfaces;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryService.Controllers
 {
     [ApiController]
-    [Route("books/[action]")]
+    [Route("books/")]
     public class BooksController : ControllerBase
     {
         private readonly IBookDataWriter _dataWriter;
@@ -30,19 +31,24 @@ namespace LibraryService.Controllers
             _rateProvider = rateProvider;
         }
         
-        [HttpGet]
+        [HttpGet("")]
         public IActionResult Get([Required]string id)
         {
             BookDTO currentBook = _provider.Get(id);
-            if (currentBook == null)
-            {
-                return BadRequest();
-            }
 
             return new ObjectResult(currentBook);
         }
         
-        [HttpPost]
+        [HttpGet("all")]
+        public IActionResult GetAll()
+        {
+            var currentBooks = _provider.GetAll();
+
+            return new ObjectResult(currentBooks);
+        }
+        
+        [HttpPost("")]
+        [ProducesResponseType(typeof(BookPostModel), (int)HttpStatusCode.OK)]
         public IActionResult Post([Required][FromBody]BookPostModel model)
         {
             if (ModelState.IsValid)
@@ -55,28 +61,10 @@ namespace LibraryService.Controllers
                     Rate = model.Rate,
                     Description = model.Description,
                     Year = model.Year,
-                    RatesAmount = model.RatesAmount
+                    RatesAmount = model.RatesAmount,
+                    Image = model.Image,
+                    FileBook = model.FileBook
                 };
-                if (model.Image != null && model.FileBook != null)
-                {
-                    byte[] imageData = null;
-                    using (var binaryReader = new BinaryReader(model.Image.OpenReadStream()))
-                    {
-                        imageData = binaryReader.ReadBytes((int)model.Image.Length);
-                    }
-                    newBook.Image = imageData;
-
-                    byte[] fileData = null;
-                    using (var binaryReader = new BinaryReader(model.FileBook.OpenReadStream()))
-                    {
-                        fileData = binaryReader.ReadBytes((int)model.FileBook.Length);
-                    }
-                    newBook.FileBook = fileData;
-                }
-                else
-                {
-                    return BadRequest();
-                }
 
                 _dataWriter.Add(newBook);
             }
@@ -84,7 +72,8 @@ namespace LibraryService.Controllers
             return Ok();
         }
         
-        [HttpPut]
+        [HttpPut("")]
+        [ProducesResponseType(typeof(BookPostModel), (int)HttpStatusCode.OK)]
         public IActionResult Put([Required]string id, [Required][FromBody]BookPostModel model)
         {
             if (ModelState.IsValid)
@@ -98,36 +87,18 @@ namespace LibraryService.Controllers
                     Rate = model.Rate,
                     Description = model.Description,
                     Year = model.Year,
-                    RatesAmount = model.RatesAmount
+                    RatesAmount = model.RatesAmount,
+                    Image = model.Image,
+                    FileBook = model.FileBook
                 };
-                if (model.Image != null && model.FileBook != null)
-                {
-                    byte[] imageData = null;
-                    using (var binaryReader = new BinaryReader(model.Image.OpenReadStream()))
-                    {
-                        imageData = binaryReader.ReadBytes((int)model.Image.Length);
-                    }
-                    editedBook.Image = imageData;
-
-                    byte[] fileData = null;
-                    using (var binaryReader = new BinaryReader(model.FileBook.OpenReadStream()))
-                    {
-                        fileData = binaryReader.ReadBytes((int)model.FileBook.Length);
-                    }
-                    editedBook.FileBook = fileData;
-                }
-                else
-                {
-                    return BadRequest();
-                }
-
+                
                 _dataWriter.Update(editedBook);
             }
 
             return Ok();
         }
         
-        [HttpDelete]
+        [HttpDelete("")]
         public IActionResult Delete([Required]string id)
         {
             foreach (var c in _commentProvider.Get(new CommentFilter { CommentedEssenceId =  id}))
@@ -142,7 +113,7 @@ namespace LibraryService.Controllers
             return Ok();
         }
 
-        [HttpGet]
+        [HttpGet("download")]
         public IActionResult DownloadBook([Required]string id)
         {
             BookDTO book = _provider.Get(id);

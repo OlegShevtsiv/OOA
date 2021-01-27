@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using Library.DataAccess.EF;
 using Library.DataAccess.Interfaces;
-using Library.DataAccess.SQLite;
 
 namespace Library.DataAccess.Implementation
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly LibraryReadContext _context;
+        private readonly ReadContext _context;
 
         private Dictionary<Type, object> _repositories;
 
-        public UnitOfWork(LibraryReadContext context)
+        public UnitOfWork(ReadContext context)
         {
             _context = context;
         }

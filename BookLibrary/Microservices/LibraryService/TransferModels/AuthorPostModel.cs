@@ -10,7 +10,6 @@ namespace LibraryService.TransferModels
         [Required]
         public string Surname { get; set; }
         public string Description { get; set; }
-        [Required]
-        public IFormFile Image { get; set; }
+        public byte[] Image { get; set; }
     }
 }

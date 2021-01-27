@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BookLibrary.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +37,11 @@ namespace BookLibrary
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddHttpClient<ILibraryHttpDataClient, LibraryHttpDataClient>().ConfigureHttpClient(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5006/");
             });
 
             services.AddEntityFrameworkSqlite().AddDbContext<LibraryContext>();

@@ -1,6 +1,9 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
 using Library.DataAccess.DTO;
+using Library.DataProviders.Filters;
 using Library.DataProviders.Interfaces;
 using Library.DataWriters.Interfaces;
 using LibraryService.TransferModels;
@@ -9,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryService.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("rates/")]
     public class RatesController : ControllerBase
     {
         private readonly IRateDataWriter _dataWriter;
@@ -25,7 +28,24 @@ namespace LibraryService.Controllers
             _bookDataWriter = bookDataWriter;
         }
 
-        [HttpPost]
+        [HttpGet()]
+        public IActionResult GetByBook([Required]string bookId)
+        {
+            var currentBooks = _provider.Get(new RateFilterByBookId{BookId = bookId});
+
+            return new ObjectResult(currentBooks);
+        }
+        
+        [HttpGet("byUser")]
+        public IActionResult GetByUser([Required]string userId)
+        {
+            var currentBooks = _provider.Get(new RateFilterByUserId(){UserId = userId});
+
+            return new ObjectResult(currentBooks);
+        }
+
+        [HttpPost("rateBook")]
+        [ProducesResponseType(typeof(RatePostModel), (int)HttpStatusCode.OK)]
         public IActionResult RateBook([FromBody]RatePostModel rate)
         {
             BookDTO bookToRate = _bookProvider.Get(rate.RatedEssenceId);
