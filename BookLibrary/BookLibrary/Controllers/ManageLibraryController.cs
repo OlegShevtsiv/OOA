@@ -18,6 +18,7 @@ using BookLibrary.ViewModels.Sorting.States;
 using BookLibrary.ViewModels.Sorting;
 using BookLibrary.ViewModels.Pagination;
 using BookLibrary.ViewModels.Filtration;
+using Newtonsoft.Json;
 
 namespace BookLibrary.Controllers
 {
@@ -40,11 +41,11 @@ namespace BookLibrary.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index(int page = 1, SortEnum sortOrder = SortEnum.TITLE_ASC)
+        public async Task<IActionResult> Index(int page = 1, SortEnum sortOrder = SortEnum.TITLE_ASC)
         {
             int pageSize = 2;
 
-            List<BookDTO> Books = _bookService.GetAll().ToList();
+            List<BookDTO> Books = (await _client.GetData<IEnumerable<BookDTO>>("books/all")).ToList();
             
             switch (sortOrder)
             {
@@ -100,7 +101,7 @@ namespace BookLibrary.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddBook(BookViewModel model)
+        public async Task<IActionResult> AddBook(BookViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -138,16 +139,18 @@ namespace BookLibrary.Controllers
                 {
                     return RedirectToAction("Error");
                 }
+                
+                string postData = JsonConvert.SerializeObject(newBook);
 
-                _bookService.Add(newBook);
+                await _client.PostData("books", postData);
             }
             return RedirectToAction("Index");
         }
 
         [HttpGet]
-        public IActionResult EditBook(string id)
+        public async Task<IActionResult> EditBook(string id)
         {
-            BookDTO getedBook = _bookService.Get(id);
+            var getedBook = (await _client.GetData<BookDTO>($"books?id={id}"));
             if (getedBook == null)
             {
                 return RedirectToAction("Error");
@@ -166,7 +169,7 @@ namespace BookLibrary.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditBook(BookViewModel model)
+        public async Task<IActionResult> EditBook(BookViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -176,7 +179,6 @@ namespace BookLibrary.Controllers
                 }
                 BookDTO editedBook = new BookDTO
                 {
-                    Id = model.Id,
                     Title = model.Title.Trim(),
                     AuthorId = model.AuthorId,
                     Genre = model.Genre,
@@ -206,7 +208,10 @@ namespace BookLibrary.Controllers
                     return RedirectToAction("Error");
                 }
 
-                _bookService.Update(editedBook);
+                string postData = JsonConvert.SerializeObject(editedBook);
+
+                await _client.PutData("authors", model.Id, postData);
+                
             }
             return RedirectToAction("Index");
         }
@@ -233,7 +238,7 @@ namespace BookLibrary.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddAuthor(AuthorViewModel model)
+        public async Task<IActionResult> AddAuthor(AuthorViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -262,16 +267,18 @@ namespace BookLibrary.Controllers
                 {
                     return RedirectToAction("Error");
                 }
-                _authorService.Add(newAuthor);
+                string postData = JsonConvert.SerializeObject(newAuthor);
+
+                await _client.PostData("authors", postData);
             }
             
             return RedirectToAction("AuthorsList");
         }
 
         [HttpGet]
-        public IActionResult EditAuthor(string id)
+        public async Task<IActionResult> EditAuthor(string id)
         {
-            AuthorDTO getedAuthor = _authorService.Get(id);
+            var getedAuthor = (await _client.GetData<AuthorDTO>($"authors?id={id}"));
             if (getedAuthor == null)
             {
                 return RedirectToAction("Error");
@@ -287,7 +294,7 @@ namespace BookLibrary.Controllers
         }
 
         [HttpPost]
-        public IActionResult EditAuthor(AuthorViewModel model)
+        public async Task<IActionResult> EditAuthor(AuthorViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -298,7 +305,6 @@ namespace BookLibrary.Controllers
 
                 AuthorDTO newAuthor = new AuthorDTO
                 {
-                    Id = model.Id,
                     Name = model.Name.Trim(),
                     Description = model.Description,
                     Surname = model.Surname.Trim()
@@ -317,7 +323,9 @@ namespace BookLibrary.Controllers
                     return RedirectToAction("Error");
                 }
 
-                _authorService.Update(newAuthor);
+                string postData = JsonConvert.SerializeObject(newAuthor);
+
+                await _client.PutData("authors", model.Id, postData);
             }
             return RedirectToAction("AuthorsList");
         }
@@ -333,11 +341,11 @@ namespace BookLibrary.Controllers
             return RedirectToAction("AuthorsList");
         }
 
-        public IActionResult AuthorsList(int page = 1, SortEnum sortOrder = SortEnum.NAME_ASC)
+        public async Task<IActionResult> AuthorsList(int page = 1, SortEnum sortOrder = SortEnum.NAME_ASC)
         {
             int pageSize = 2;
 
-            List<AuthorDTO> Authors = _authorService.GetAll().ToList();
+            List<AuthorDTO> Authors = (await _client.GetData<IEnumerable<AuthorDTO>>("authors/all")).ToList();
             
             switch(sortOrder)
             {

@@ -2,6 +2,8 @@
 @using Services.Interfaces;
 @using BookLibrary.ViewModels.ManageComments;
 @using BookLibrary.ViewModels.Home;
+@using BookLibrary.Client
+@using Services.DTO
 
 
 @model Services.DTO.BookDTO
@@ -10,7 +12,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@* @inject IAuthorService authorService *@
+@inject ILibraryHttpDataClient _client;
 @inject UserManager<IdentityUser> userManager
 @inject SignInManager<IdentityUser> signInManager
 
@@ -37,7 +39,10 @@
             <div class="book_desc d-flex">
                 <div class="h3 text-bold pr-3  my-0">Author</div>
                 <div class="h4 pt-1 my-0">
-                    <a asp-action="GetAuthorInfo" asp-route-id="@Model.AuthorId">@Model.AuthorId</a>
+                    @{
+                        var author = _client.GetData<AuthorDTO>($"authors?id={Model.AuthorId}").Result;
+                    }
+                    <a asp-action="GetAuthorInfo" asp-route-id="@author.Id">@author.Name @author.Surname</a>
                 </div>
             </div>
             <div class="d-flex">
